@@ -96,7 +96,7 @@ class DatabaseFetcher:
 
     # raise exception da conexao do banco
     @staticmethod
-    def retrieve_tickets(date_str: string, last_updated_date=None):
+    def retrieve_tickets(last_updated_date=None):
 
         connection = DatabaseFetcher.open_connection()
 
