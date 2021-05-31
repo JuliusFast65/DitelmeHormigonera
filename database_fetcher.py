@@ -24,10 +24,10 @@ class DatabaseFetcher:
 
             if last_order_code is None:
                 print("FETCHING ALL ORDERS IN RANGE")
-                cursor.execute(sql, current_date=date_str)
+                cursor.execute(sql)
             else:
                 print("FETCHING ONLY NEW", last_order_code)
-                cursor.execute(sql, last_order_code=last_order_code)
+                cursor.execute(sql)
 
             formatted_orders = []
             data = cursor.fetchall()
