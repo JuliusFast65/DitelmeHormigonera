@@ -2,7 +2,10 @@ import time
 import traceback
 from datetime import datetime, timedelta
 from processor import SignalHandler
+import ctypes
 
+kernel32 = ctypes.windll.kernel32
+kernel32.SetConsoleMode(kernel32.GetStdHandle(-10), 128)
 
 def sync(handler:SignalHandler):
     try:
