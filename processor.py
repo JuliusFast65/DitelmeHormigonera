@@ -13,10 +13,10 @@ class SignalHandler:
     def process(self,date_str):
         try:
 
-            # orders = DatabaseFetcher.retrieve_orders(date_str)
-
+            orders = DatabaseFetcher.retrieve_orders(date_str)
+            print("TICKETS")
             tickets = DatabaseFetcher.retrieve_tickets(date_str,last_updated_date=self.last_updated_date)
-
+            print("DONE")
             # db_data,self.last_updated_date = DatabaseFetcher.retrieve_tickets(date_str,last_updated_date=self.last_updated_date)
             #
             # sender = LoopSender()

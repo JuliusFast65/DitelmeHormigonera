@@ -225,7 +225,7 @@ class DatabaseFetcher:
         sql += "inner join Obras O on O.Codigo=OP.Codigo and C.Id=O.IdCliente "
         sql += "inner join FormulasPedidos FP on FP.IdPedido=P.Id "
         sql += "inner join ElementosHormigonado EH on FP.IdElementoHormigonado=EH.Id "
-        sql += "where P.Fecha >= GETDATE() "
+        sql += "where P.Fecha >= cast(getdate() as date) "
         sql += "group by "
         sql += "P.NumPedido,CP.Codigo,O.Codigo,O.Nombre,CP.Nombre,O.Direccion,O.Provincia,EH.Codigo,EH.Texto,P.Activo,P.EnProduccion,P.PendienteAviso, "
         sql += "P.Observaciones,FP.NomenclaturaInterna,FP.Denominacion,P.VolInicial,P.VolModificado "
