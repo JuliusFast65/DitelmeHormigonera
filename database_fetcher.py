@@ -4,13 +4,13 @@ import pymssql
 
 P = "12345"
 U = "GestecNET"
-IP = "localhost"
+IP = "192.168.0.127"
 
 class DatabaseFetcher:
 
     @staticmethod
     def open_connection():
-        conn = pymssql.connect(server='localhost', user=U, password=P, database=U)
+        conn = pymssql.connect(server=IP, user=U, password=P, database=U)
         return conn
 
     @staticmethod
@@ -57,16 +57,15 @@ class DatabaseFetcher:
                         break
                     else:
                         order_products.append(DatabaseFetcher._get_order_product(next_order,item_index))
-
                         item_index += 1
-                        index += 1
 
                     new_index += 1
 
                 order['order_products'] = order_products
 
                 formatted_orders.append(order)
-                index += 1
+
+                index += item_index
 
             cursor.close()
 
