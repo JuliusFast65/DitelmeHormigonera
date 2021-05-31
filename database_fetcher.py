@@ -101,7 +101,7 @@ class DatabaseFetcher:
         connection = DatabaseFetcher.open_connection()
 
         try:
-            cursor = connection.cursor()
+            cursor = connection.cursor(as_dict=True)
             sql = DatabaseFetcher.build_query(last_updated_date=last_updated_date)
 
             if last_updated_date is None:
@@ -111,7 +111,6 @@ class DatabaseFetcher:
                 print("FETCHING ONLY NEW", last_updated_date)
                 cursor.execute(sql, last_updated_date=last_updated_date)
 
-            cursor.rowfactory = DatabaseFetcher.dict_row_factory(cursor)
 
             formatted_requests = []
             data = cursor.fetchall()
@@ -119,19 +118,17 @@ class DatabaseFetcher:
             print(data)
             index = 0
 
-            for req in data:
-
-                req['START'] = req.pop('STARTX')
-
-                if index == 0:
-                    last_updated_date = req['START']
-
-                formatted_requests.append(req)
-                index += 1
+            for tkt in data:
+                ticket = {}
+                for col in tkt:
+                    ticket[col.upper()] = tkt[col]
+                formatted_requests.append(ticket)
 
             cursor.close()
 
             print("LAST UP DATE",last_updated_date)
+
+            print(formatted_requests)
 
             return formatted_requests,last_updated_date
 
@@ -152,40 +149,45 @@ class DatabaseFetcher:
     @staticmethod
     def build_query(last_updated_date=None) -> string:
 
-        sql = "SELECT \
-            OPR.NRO_ORDEM_PRODUCAO_REMESSA as DELIVERYCODE, \
-            TO_CHAR(OPR.data_lancamento,'YYYY-MM-DD HH24:MI:SS') as STARTX, \
-            OPR.cod_agente_motorista as DRIVERCODE, \
-            OPR.nome_motorista as DRIVERNAME, \
-            OPR.cod_equipamento as TRUCKCODE, \
-            OPR.cod_item as PRODUCTCODE, \
-            I.descricao as PRODUCTNAME, \
-            OPR.equipamento_lacre as SEAL,\
-            P.NRO_PEDIDO as ORDER_CODE, \
-            OPR.cod_empresa as PLANTCODE,\
-            OPR.qtd as VOLUME,\
-            A.COD_AGENTE as CUSTOMERCODE,\
-            A.NOME as CUSTOMERNAME,\
-            AE.COD_AGENTE as ADDRESSCODE,\
-            AE.NOME as ADDRESSNAME,\
-            AE.ENDERECO_ENTREGA as DELIVERYADDRESS,\
-            to_char(AE.COD_AGENTE||'-'||A.COD_AGENTE) as PROJECTCODE,\
-            AE.NOME as PROJECTNAME \
-            FROM ODIN_MFARTEFATOS.ORDEM_PRODUCAO_REMESSA_PEDIDO OPRP\
-            inner join ODIN_MFARTEFATOS.ORDEM_PRODUCAO_REMESSA OPR on OPRP.NRO_ORDEM_PRODUCAO_REMESSA=OPR.NRO_ORDEM_PRODUCAO_REMESSA\
-            inner join ODIN_MFARTEFATOS.PEDIDO P on OPRP.NRO_PEDIDO=P.NRO_PEDIDO \
-            inner join ODIN_MFARTEFATOS.AGENTE A on A.COD_AGENTE=P.COD_AGENTE \
-            inner join ODIN_MFARTEFATOS.AGENTE AE on AE.COD_AGENTE=P.COD_AGENTE_ENTREGA \
-            inner join ODIN_MFARTEFATOS.ITEM I on I.COD_ITEM=OPR.COD_ITEM "
+        sql = "select "
+        sql += "cast(A.NAlbaran as varchar(20)) as deliverycode, "
+        sql += "convert(varchar,A.FechaInsercion,20) as ticket, "
+        sql += "convert(varchar,A.FechaDosificacion,20) as start, "
+        sql += "convert(varchar,A.FechaFinDosificacion,20) as endload, "
+        sql += "cast(A.NAlbaran as varchar(20)) as invoice, "
+        sql += "'01' as plantcode, "
+        sql += "CA.Codigo as truckcode, "
+        sql += "A.VolFacturar as volume, "
+        sql += "FP.NomenclaturaInterna as productcode, "
+        sql += "FP.Denominacion as productname, "
+        sql += "Concat(CP.Codigo,'-',O.Codigo) as projectcode, "
+        sql += "O.Nombre as projectname, "
+        sql += "CP.Codigo as customercode, "
+        sql += "CP.Nombre as customername, "
+        sql += "Concat(CP.Codigo,'-',O.Codigo) as addresscode, "
+        sql += "O.Direccion as deliveryaddress, "
+        sql += "COA.Codigo as drivercode, "
+        sql += "COA.Nombre as drivername, "
+        sql += "cast(P.NumPedido as varchar(20)) as order_code "
+        sql += "from Pedidos P "
+        sql += "inner join PedidosDetalles PD on PD.IdPedido=P.Id "
+        sql += "inner join ClientesPedidos CP on CP.IdPedido=P.Id "
+        sql += "inner join Clientes C on C.Codigo=CP.Codigo "
+        sql += "inner join ObrasPedidos OP on OP.IdPedido=P.Id "
+        sql += "inner join Obras O on O.Codigo=OP.Codigo and C.Id=O.IdCliente "
+        sql += "inner join FormulasPedidos FP on FP.IdPedido=P.Id "
+        sql += "inner join ElementosHormigonado EH on FP.IdElementoHormigonado=EH.Id "
+        sql += "inner join Albaranes A on A.id=PD.IdAlbaran "
+        sql += "inner join CamionesAlbaranes CA on CA.IdAlbaran=A.Id "
+        sql += "inner join ConductoresAlbaranes COA on COA.IdAlbaran=A.Id "
 
-        if last_updated_date is not None:
-            sql += "where TO_CHAR(OPR.data_lancamento,'YYYY-MM-DD HH24:MI:SS') > :last_updated_date "
+        if last_updated_date is None:
+            sql += "where A.FechaInsercion>=cast(getdate() as date) "
         else:
-            sql += "where TO_CHAR(OPR.data_lancamento,'YYYY-MM-DD') >= :current_date "
-
-        sql += "order by OPR.data_lancamento desc"
+            sql += "where convert(varchar,A.FechaInsercion,20)>'" + last_updated_date + "'"
 
         return sql
+
 
     @staticmethod
     def build_query_orders(last_order_code:int = None):
