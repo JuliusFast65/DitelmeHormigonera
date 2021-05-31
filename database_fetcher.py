@@ -34,7 +34,6 @@ class DatabaseFetcher:
             formatted_orders = []
             data = cursor.fetchall()
 
-            print(data)
             index = 0
             last_order_code = None
 
@@ -116,7 +115,7 @@ class DatabaseFetcher:
                 cursor.execute(sql)
             else:
                 print("FETCHING ONLY NEW", last_updated_date)
-                cursor.execute(sql, last_updated_date=last_updated_date)
+                cursor.execute(sql)
 
 
             formatted_requests = []
@@ -140,8 +139,6 @@ class DatabaseFetcher:
             cursor.close()
 
             print("LAST UP DATE",last_updated_date)
-
-            print(formatted_requests)
 
             return formatted_requests,last_updated_date
 
