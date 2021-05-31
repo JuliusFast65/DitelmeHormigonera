@@ -22,6 +22,8 @@ class DatabaseFetcher:
             cursor = connection.cursor(as_dict=True)
             sql = DatabaseFetcher.build_query_orders(last_order_code=last_order_code)
 
+            print(sql)
+
             if last_order_code is None:
                 print("FETCHING ALL ORDERS IN RANGE")
                 cursor.execute(sql)
