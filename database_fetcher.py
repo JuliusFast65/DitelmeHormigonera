@@ -43,6 +43,10 @@ class DatabaseFetcher:
                 order = data[index]
                 order = {k.casefold(): v for k, v in order.items()}
 
+                if order["city_code"] == "" or order['city_name'] == "":
+                    order["city_code"] = None
+                    order["city_name"] = None
+
                 if index == 0:
                     last_order_code = order['order_code']
 
