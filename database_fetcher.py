@@ -85,9 +85,9 @@ class DatabaseFetcher:
     def _get_order_product(order:dict,product_index:int):
         order_product = {
             'delivery_type' : order.get('delivery_type',2),
-            'price': order['price'],
+            'price': order.get('price',0),
             'item_number': product_index,
-            'product_type': order['product_type'],
+            'product_type': order.get('price',1),
             'quantity': order['quantity'],
             'product_code': order['product_code'],
             'product_name': order['product_name']
@@ -106,7 +106,7 @@ class DatabaseFetcher:
 
             if last_updated_date is None:
                 print("FETCHING ALL IN RANGE")
-                cursor.execute(sql, current_date=date_str)
+                cursor.execute(sql)
             else:
                 print("FETCHING ONLY NEW", last_updated_date)
                 cursor.execute(sql, last_updated_date=last_updated_date)
