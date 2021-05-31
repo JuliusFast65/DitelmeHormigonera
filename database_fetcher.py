@@ -127,10 +127,16 @@ class DatabaseFetcher:
             index = 0
 
             for tkt in data:
+
                 ticket = {}
                 for col in tkt:
                     ticket[col.upper()] = tkt[col]
+
+                if index == 0:
+                    last_updated_date = tkt['START']
+
                 formatted_requests.append(ticket)
+                index += 1
 
             cursor.close()
 
@@ -193,6 +199,8 @@ class DatabaseFetcher:
             sql += "where A.FechaInsercion>=cast(getdate() as date) "
         else:
             sql += "where convert(varchar,A.FechaInsercion,20)>'" + last_updated_date + "'"
+
+        sql += " ORDER BY A.FechaInsercion DESC "
 
         return sql
 

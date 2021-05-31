@@ -21,8 +21,8 @@ def sync(handler:SignalHandler):
 if __name__ == '__main__':
 
     handler = SignalHandler()
-    sync(handler)
+    # sync(handler)
 
-    # while True:
-    #     sync(handler)
-    #     time.sleep(60)
+    while True:
+        sync(handler)
+        time.sleep(60)
