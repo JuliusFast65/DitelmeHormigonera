@@ -79,7 +79,6 @@ class DatabaseFetcher:
 
             cursor.close()
 
-            print(formatted_orders)
             print("LAST UP DATE",last_order_code)
 
             return formatted_orders
@@ -123,17 +122,17 @@ class DatabaseFetcher:
             formatted_requests = []
             data = cursor.fetchall()
 
-            print(data)
             index = 0
 
             for tkt in data:
 
                 ticket = {}
+
                 for col in tkt:
                     ticket[col.upper()] = tkt[col]
 
                 if index == 0:
-                    last_updated_date = tkt['START']
+                    last_updated_date = ticket['START']
 
                 formatted_requests.append(ticket)
                 index += 1
